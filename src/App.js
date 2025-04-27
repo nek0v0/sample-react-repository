@@ -1,69 +1,58 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-import userinfo from "./userinfo.json";
-import Menu from "./pages/menu";
-import Page1 from "./pages/page1";
-import Page2 from "./pages/page2";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import LoginPage from './components/LoginPage';
+import MenuPage from './components/MenuPage';
+import Page1 from './components/Page1';
+import Page2 from './components/Page2';
+import Header from './components/Header'; 
+import Footer from './components/Footer'; 
+import userinfo from './userinfo.json';
 
 function App() {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [error, setError] = useState("");
+  const [userName, setUserName] = useState('');
 
-  const handleLogin = () => {
-    if (userId === userinfo.id && password === userinfo.password) {
+  const handleLogin = (inputId, inputPass) => {
+    if (inputId === userinfo.id && inputPass === userinfo.password) {
+      console.log('ログイン成功');
       setIsLoggedIn(true);
-      setError("");
+      setUserName(inputId);
     } else {
-      setError("IDまたはパスワードが違います");
+      alert('IDまたはパスワードが違います');
     }
   };
 
-  //logout
   const handleLogout = () => {
+    console.log('ログアウトしました');
     setIsLoggedIn(false);
+    setUserName('');
   };
 
-
   return (
-    <BrowserRouter>
+    <Router>
+      <Header userName={userName} /> {}
       <Routes>
-        {!isLoggedIn ? (
-          <Route path="*" element={
-            <div style={{ textAlign: "center", marginTop: "50px" }}>
-              <h1>ログイン</h1>
-              <div style={{ marginBottom: "10px" }}>
-                <input
-                  type="text"
-                  placeholder="ID"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                />
-              </div>
-              <div style={{ marginBottom: "10px" }}>
-                <input
-                  type="password"
-                  placeholder="パスワード"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <button onClick={handleLogin}>ログインする</button>
-              {error && <p style={{ color: "red" }}>{error}</p>}
-            </div>
-          } />
-        ) : (
-          <>
-            <Route path="/" element={<Menu onLogout={handleLogout} />} />
-            <Route path="/page1" element={<Page1 />} />
-            <Route path="/page2" element={<Page2 />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </>
-        )}
+        <Route
+          path="/"
+          element={
+            isLoggedIn ? (
+              <MenuPage onLogout={handleLogout} userName={userName} />
+            ) : (
+              <LoginPage onLogin={handleLogin} />
+            )
+          }
+        />
+        <Route
+          path="/page1"
+          element={isLoggedIn ? <Page1 /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/page2"
+          element={isLoggedIn ? <Page2 /> : <Navigate to="/" />}
+        />
       </Routes>
-    </BrowserRouter>
+      <Footer /> {}
+    </Router>
   );
 }
 
